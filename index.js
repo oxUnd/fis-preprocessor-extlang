@@ -52,35 +52,6 @@ function extJs(content, map){
     });
 }
 
-//expand css
-//[@require id] in comment to require resource
-//[@import url(path?__inline)] to embed resource content
-//url(path) to locate resource
-//url(path?__inline) to embed resource content or base64 encodings
-//src=path to locate resource
-function extCss(content, map){
-    var reg = /(\/\*[\s\S]+?(?:\*\/|$))|(?:@import\s+)?\burl\s*\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^)}]+)\s*\)|\bsrc\s*=\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^\s}]+)/g;
-    return content.replace(reg, function(m, comment, url, filter){
-        if(url){
-            var key = isInline(fis.util.query(url)) ? 'embed' : 'uri';
-            if(m.indexOf('@') === 0){
-                if(key === 'embed'){
-                    m = map.embed.ld + url + map.embed.rd;
-                } else {
-                    m = '@import url(' + map.uri.ld + url + map.uri.rd + ')';
-                }
-            } else {
-                m = 'url(' + map[key].ld + url + map[key].rd + ')';
-            }
-        } else if(filter) {
-            m = 'src=' + map.uri.ld + filter + map.uri.rd;
-        } else if(comment) {
-            m = analyseComment(comment, map);
-        }
-        return m;
-    });
-}
-
 // html
 //{%script|style ...%}...{%/script|style%} to analyse as js|css
 function extHtml(content, map, conf){
