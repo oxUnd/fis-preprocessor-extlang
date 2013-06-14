@@ -55,7 +55,7 @@ function extJs(content, map){
 // html
 //{%script|style ...%}...{%/script|style%} to analyse as js|css
 function extHtml(content, map, conf){
-    var reg = new RegExp('('+conf.ld+'script(?:\\s+[\\s\\S]+?["\'\\s\\w\\/]'+conf.rd+'|'+conf.rd+'))([\\s\\S]*?)(?='+conf.ld+'\\/script'+conf.rd+'|$)|('+conf.ld+'style(?:\\s+[\\s\\S]+?["\'\\s\\w\\/]'+conf.rd+'|'+conf.rd+'))([\\s\\S]*?)(?='+conf.ld+'\\/style'+conf.rd+'|$)', 'ig');
+    var reg = new RegExp('('+conf.ld+'script(?:\\s*[\\s\\S]+?["\'\\s\\w\\/]'+conf.rd+'|'+conf.rd+'))([\\s\\S]*?)(?='+conf.ld+'\\/script'+conf.rd+'|$)|('+conf.ld+'style(?:\\s+[\\s\\S]+?["\'\\s\\w\\/]'+conf.rd+'|'+conf.rd+'))([\\s\\S]*?)(?='+conf.ld+'\\/style'+conf.rd+'|$)', 'ig');
     return content.replace(reg, function(m, $1, $2, $3, $4){
         if ($1) {
             m = $1 + extJs($2, map);
