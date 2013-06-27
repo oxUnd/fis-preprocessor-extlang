@@ -1,0 +1,1 @@
+{%script charset="UTF-8"%}__inline("./e.js"){%/script%}

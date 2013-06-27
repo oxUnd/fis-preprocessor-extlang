@@ -1,0 +1,1 @@
+{%script%}__inline("./e.js"){%/script%}
