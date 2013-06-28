@@ -25,7 +25,7 @@ describe('compile(path, debug)', function () {
      *extlang中extHtml对标签{%script ...%}...{%/script%}的匹配验证
      * 以下三个例子
      * */
-    it('script_TagMatching',function(){
+    it('{%script%}_TagMatching',function(){
         // {%script%}...{%/script%}
         var f = file(__dirname+'/file/embeded1.tpl');
         tempfiles.push(f);
@@ -37,7 +37,7 @@ describe('compile(path, debug)', function () {
         expect(c).to.equal('{%script%}<[{embed(\"./e.js\")}]>{%/script%}');
     });
 
-    it('script_TagMatching',function(){
+    it('{%script %}_TagMatching',function(){
         //{%script %}...{%/script%}
         var f = file(__dirname+'/file/embeded2.tpl');
         tempfiles.push(f);
@@ -49,7 +49,7 @@ describe('compile(path, debug)', function () {
         expect(c).to.equal('{%script %}<[{embed(\"./e.js\")}]>{%/script%}');
     });
 
-    it('script_TagMatching',function(){
+    it('{%script ...%}_TagMatching',function(){
         //{%script ...%}...{%/script%}
         var f = file(__dirname+'/file/embeded3.tpl');
         tempfiles.push(f);
