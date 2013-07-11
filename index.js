@@ -5,6 +5,8 @@
 
 'use strict'
 
+var ld, rd;
+
 function pregQuote (str, delimiter) {
     // http://kevin.vanzonneveld.net
     return (str + '').replace(new RegExp('[.\\\\+*?\\[\\^\\]$(){}=!<>|:\\' + (delimiter || '') + '-]', 'g'), '\\$&');
@@ -55,7 +57,7 @@ function extJs(content, map){
 // html
 //{%script ...%}...{%/script%} to analyse as js
 function extHtml(content, map, conf){
-    var reg = new RegExp('('+conf.ld+'script(?:(?=\\s)[\\s\\S]*?["\'\\s\\w]'+conf.rd+'|'+conf.rd+'))([\\s\\S]*?)(?='+conf.ld+'\\/script'+conf.rd+'|$)', 'ig');
+    var reg = new RegExp('('+ld+'script(?:(?=\\s)[\\s\\S]*?["\'\\s\\w]'+rd+'|'+rd+'))([\\s\\S]*?)(?='+ld+'\\/script'+rd+'|$)', 'ig');
     return content.replace(reg, function(m, $1, $2, $3, $4){
         if ($1) {
             m = $1 + extJs($2, map);
@@ -65,10 +67,10 @@ function extHtml(content, map, conf){
 }
 
 module.exports = function (content, file, conf) {
-    conf.ld = conf.ld ? conf.ld : '{%';
-    conf.rd = conf.rd ? conf.rd : '%}';
-    conf.ld = pregQuote(conf.ld);
-    conf.rd = pregQuote(conf.rd);
+    ld = conf.left_delimiter || fis.config.get('settings.smarty.left_delimiter') || '{%';
+    rd = conf.right_delimiter || fis.config.get('settings.smarty.right_delimiter') || '%}';
+    ld = pregQuote(ld);
+    rd = pregQuote(rd);
     if (file.rExt === '.tpl') {
         return extHtml(content, fis.compile.lang, conf);
     }
