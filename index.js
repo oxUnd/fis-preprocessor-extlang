@@ -54,13 +54,45 @@ function extJs(content, map){
     });
 }
 
+//expand css
+//[@require id] in comment to require resource
+//[@import url(path?__inline)] to embed resource content
+//url(path) to locate resource
+//url(path?__inline) to embed resource content or base64 encodings
+//src=path to locate resource
+function extCss(content, map){
+    var reg = /(\/\*[\s\S]*?(?:\*\/|$))|(?:@import\s+)?\burl\s*\(\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^)}]+)\s*\)(\s*;?)|\bsrc\s*=\s*("(?:[^\\"\r\n\f]|\\[\s\S])*"|'(?:[^\\'\n\r\f]|\\[\s\S])*'|[^\s}]+)/g;
+    var callback =  function(m, comment, url, last, filter){
+        if(url){
+            var key = isInline(fis.util.query(url)) ? 'embed' : 'uri';
+            if(m.indexOf('@') === 0){
+                if(key === 'embed'){
+                    m = map.embed.ld + url + map.embed.rd + last.replace(/;$/, '');
+                } else {
+                    m = '@import url(' + map.uri.ld + url + map.uri.rd + ')' + last;
+                }
+            } else {
+                m = 'url(' + map[key].ld + url + map[key].rd + ')' + last;
+            }
+        } else if(filter) {
+            m = 'src=' + map.uri.ld + filter + map.uri.rd;
+        } else if(comment) {
+            m = analyseComment(comment);
+        }
+        return m;
+    };
+    return content.replace(reg, callback);
+}
+
 // html
 //{%script ...%}...{%/script%} to analyse as js
 function extHtml(content, map, conf){
-    var reg = new RegExp('('+ld+'script(?:(?=\\s)[\\s\\S]*?["\'\\s\\w]'+rd+'|'+rd+'))([\\s\\S]*?)(?='+ld+'\\/script'+rd+'|$)', 'ig');
+    var reg = new RegExp('('+ld+'script(?:(?=\\s)[\\s\\S]*?["\'\\s\\w]'+rd+'|'+rd+'))([\\s\\S]*?)(?='+ld+'\\/script'+rd+'|$)|('+ld+'style(?:(?=\\s)[\\s\\S]*?["\'\\s\\w\\-]'+rd+'|'+rd+'))([\\s\\S]*?)(?='+ld+'style\\s*'+rd+'|$)', 'ig');
     return content.replace(reg, function(m, $1, $2, $3, $4){
         if ($1) {
             m = $1 + extJs($2, map);
+        } else if($3){
+            m = $3 + extCss($4, map);
         }
         return m;
     });
