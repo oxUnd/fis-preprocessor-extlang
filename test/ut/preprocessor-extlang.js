@@ -34,7 +34,7 @@ describe('compile(path, debug)', function () {
             conf_ = {};
         var c = extlang(content,f,conf_);
 
-        expect(c).to.equal('{%script%}<[{embed(\"./e.js\")}]>{%/script%}');
+        expect(c).to.equal('{%script%}'+fis.compile.lang.embed.ld+'\"./e.js\"'+fis.compile.lang.embed.rd+'{%/script%}');
     });
 
     it('{%script %}_TagMatching',function(){
@@ -46,7 +46,7 @@ describe('compile(path, debug)', function () {
             conf_ = {};
         var c = extlang(content,f,conf_);
 
-        expect(c).to.equal('{%script %}<[{embed(\"./e.js\")}]>{%/script%}');
+        expect(c).to.equal('{%script %}'+fis.compile.lang.embed.ld+'\"./e.js\"'+fis.compile.lang.embed.rd+'{%/script%}');
     });
 
     it('{%script ...%}_TagMatching',function(){
@@ -58,7 +58,7 @@ describe('compile(path, debug)', function () {
             conf_ = {};
         var c = extlang(content,f,conf_);
 
-        expect(c).to.equal('{%script charset="UTF-8"%}<[{embed(\"./e.js\")}]>{%/script%}');
+        expect(c).to.equal('{%script charset="UTF-8"%}'+fis.compile.lang.embed.ld+'\"./e.js\"'+fis.compile.lang.embed.rd+'{%/script%}');
     });
 
 
