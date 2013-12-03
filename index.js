@@ -99,11 +99,11 @@ function extHtml(content, map, conf){
 }
 
 module.exports = function (content, file, conf) {
-    ld = conf.left_delimiter || fis.config.get('settings.smarty.left_delimiter') || '{%';
-    rd = conf.right_delimiter || fis.config.get('settings.smarty.right_delimiter') || '%}';
+    ld = conf.left_delimiter || fis.config.get('settings.smarty.left_delimiter') || fis.config.get('settings.template.left_delimiter') || '{%';
+    rd = conf.right_delimiter || fis.config.get('settings.smarty.right_delimiter') || fis.config.get('settings.template.right_delimiter') || '%}';
     ld = pregQuote(ld);
     rd = pregQuote(rd);
-    if (file.rExt === '.tpl') {
+    if (file.isHtmlLike) {
         return extHtml(content, fis.compile.lang, conf);
     }
 };
