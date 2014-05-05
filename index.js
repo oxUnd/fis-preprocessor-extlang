@@ -77,7 +77,7 @@ function extCss(content, map){
         } else if(filter) {
             m = 'src=' + map.uri.ld + filter + map.uri.rd;
         } else if(comment) {
-            m = analyseComment(comment);
+            m = analyseComment(comment, map);
         }
         return m;
     };
