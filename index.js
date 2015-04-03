@@ -5,7 +5,7 @@
 
 'use strict'
 
-var ld, rd;
+var ldraw, rdraw, ld, rd;
 
 function pregQuote (str, delimiter) {
     // http://kevin.vanzonneveld.net
@@ -88,7 +88,7 @@ function extCss(content, map){
 //{%script ...%}...{%/script%} to analyse as js
 function extHtml(content, map, conf){
     var reg = new RegExp('('+ld+'script(?:(?=\\s)[\\s\\S]*?["\'\\s\\w]'+rd+'|'+rd+'))([\\s\\S]*?)(?='+ld+'\\/script'+rd+'|$)|('+ld+'style(?:(?=\\s)[\\s\\S]*?["\'\\s\\w\\-]'+rd+'|'+rd+'))([\\s\\S]*?)(?='+ld+'\\/style\\s*'+rd+'|$)', 'ig');
-    return content.replace(reg, function(m, $1, $2, $3, $4){
+    content = content.replace(reg, function(m, $1, $2, $3, $4){
         if ($1) {
             m = $1 + extJs($2, map);
         } else if($3){
@@ -96,14 +96,80 @@ function extHtml(content, map, conf){
         }
         return m;
     });
+
+    return extSmarty(content, map, conf);
+}
+
+function extSmarty(content, map, conf) {
+    var reg = new RegExp('(' + ld + '\\*[\\s\\S]*?(?:\\*' + rd + '|$))|(?:' + ld + '(extends|widget|require|uri|html)(.+?)' + rd + ')', 'ig');
+
+    content = content.replace(reg, function(m, comments, directive, params) {
+        if (!comments && params) {
+            switch (directive) {
+                case 'extends':
+                    params = params.replace(/\sfile\s*=\s*('|")(.+?)\1/ig, function(_, quote, value) {
+                        return ' file=' + map.tpl.ld + quote + value + quote + map.tpl.rd;
+                    });
+                    break;
+
+                case 'html':
+                    params = params.replace(/\sframework\s*=\s*('|")(.+?)\1/ig, function(_, quote, value) {
+                        return ' framework=' + map.id.ld + quote + value + quote + map.id.rd;
+                    });
+                    break;
+
+                default:
+                    params = params.replace(/\sname\s*=\s*('|")(.+?)\1/ig, function(_, quote, value) {
+                        return ' name=' + map.id.ld + quote + value + quote + map.id.rd;
+                    });
+                    break;
+            }
+
+            m = ldraw + directive + params + rdraw;
+        }
+
+
+        return m;
+    });
+
+    return content;
 }
 
 module.exports = function (content, file, conf) {
-    ld = conf.left_delimiter || fis.config.get('settings.smarty.left_delimiter') || fis.config.get('settings.template.left_delimiter') || '{%';
-    rd = conf.right_delimiter || fis.config.get('settings.smarty.right_delimiter') || fis.config.get('settings.template.right_delimiter') || '%}';
-    ld = pregQuote(ld);
-    rd = pregQuote(rd);
+    ldraw = conf.left_delimiter || fis.config.get('settings.smarty.left_delimiter') || fis.config.get('settings.template.left_delimiter') || '{%';
+    rdraw = conf.right_delimiter || fis.config.get('settings.smarty.right_delimiter') || fis.config.get('settings.template.right_delimiter') || '%}';
+    ld = pregQuote(ldraw);
+    rd = pregQuote(rdraw);
+
+    // 扩展两种语法
+    var map = fis.compile.lang;
+    if (!map['id'] || !map['tpl']) {
+        var LD = '<<<', RD = '>>>';
+
+        ['id', 'tpl'].forEach(function(key) {
+            map[key] = {
+                ld: LD + key + ':',
+                rd: RD
+            };
+        });
+    }
+
     if (file.isHtmlLike) {
-        return extHtml(content, fis.compile.lang, conf);
+        return extHtml(content, fis.compile.lang, conf)
+            .replace(/\<\<\<(id|tpl)\:([\s\S]+?)\>\>\>/ig, function(_, key, value) {
+                var info = fis.uri.getId(value, file.dirname);
+
+                if (info.file) {
+                    var value = info.id;
+
+                    if (key === 'tpl') {
+                        value = value.replace(':', '/');
+                    }
+
+                    return info.quote + value + info.quote;
+                }
+
+                return value;
+            });
     }
 };
